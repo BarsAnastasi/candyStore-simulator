@@ -3,11 +3,18 @@
 
 #include <iostream>
 
+// Подключение заголовочных файлов:
+
+#include "Ingredient.hpp"
 
 int main ()
 {
 
 	std::cout << "Курсовой проект: симулятор кондитерской. " << std::endl;
+
+	Ingredient eggs("Яйцо", 100, 10);
+
+	eggs.PrintInfo();
 
 	return 0; 
 
