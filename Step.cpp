@@ -19,12 +19,12 @@ Step::Step(Ingredient* ingredient, ProcessType process, int stepNum, int time)
 {
 	std::cout << "Создан объект класса Step.\n";
 
-	if(m_stepNum > 0)
+	if(stepNum > 0)
 		m_stepNum = stepNum;
 	else
 		std::cout << "Error! Порядковый номер шага должен быть больше 0.\n";
 
-	if (m_time > 0)
+	if (time > 0)
 		m_time = time;
 	else
 		std::cout << "Error! Время выполнения шага должно быть больше 0.\n";

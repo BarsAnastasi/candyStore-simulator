@@ -20,9 +20,9 @@ Recipe::Recipe(std::string name, int ingredientCapacity, int stepCapacity)
 
 Recipe::~Recipe()
 {
-	delete[] m_ingredientList;
 	delete[] m_stepList;
-	
+	delete[] m_ingredientList;
+
 	std::cout << "Удален объект класса Recipe.\n";
 }
 
