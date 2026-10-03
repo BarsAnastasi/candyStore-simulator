@@ -53,7 +53,7 @@ std::string Step::GetProcessString() const
 
 void Step::PrintInfo() const
 {
-	std::cout << "\n" << stepNum << ". " << ingredient->GetName() << ' ' << GetProcessString() << ' ' << time << " сек.\n";
+	std::cout << stepNum << ". " << ingredient->GetName() << ' ' << GetProcessString() << ' ' << time << " сек.\n";
 }
 
 
