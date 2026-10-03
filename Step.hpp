@@ -1,6 +1,8 @@
-#pragma once
+//
+// ФАЙЛ Step.hpp
+//
 
-// Объявление класса Step
+#pragma once
 
 #include "Ingredient.hpp"
 #include "EnumProcessType.hpp"
@@ -8,20 +10,18 @@
 class Step
 {
 private:
-	Ingredient* ingredient;
-	ProcessType process;
-	int stepNum,
-		time;
-	
-	
+	Ingredient* m_ingredient;   // ссылка на ингредиент рецепта
+	ProcessType m_process;		// тип обработки
+	int m_stepNum;				// номер шага
+	int m_time;					// время выполнения
 
 public:
+	Step();
 	Step(Ingredient* ingredient, ProcessType process, int stepNum, int time);
 
 	// геттеры
 	int GetTime() const;
 	ProcessType GetProcessType() const;
-	std::string GetIngredientName() const;
 	std::string GetProcessString() const;
 
 	void PrintInfo() const;

@@ -1,15 +1,29 @@
+//
+// ФАЙЛ Ingredient.cpp
+//
 
-// Реализация класса Ingredient
-
-#include <iostream>
 #include "Ingredient.hpp"
 
+#include <iostream>
+
+Ingredient::Ingredient()
+	: m_name("-"), m_state("не задан"), m_price(0), m_count(0)
+{
+	std::cout << "Создан объект класса Ingredient с конструктором без параметров.\n";
+}
+
 Ingredient::Ingredient(std::string name, int price, int count)
+	: m_name(name), m_state("не обработан"), m_price(0), m_count(0)
 {
 	std::cout << "Создан объект класса Ingredient.\n";
-	this->name = name;
-	this->state = "не обработан";
 	SetPrice(price);
+	SetCount(count);
+}
+
+Ingredient::Ingredient(std::string name, int count)
+	: m_name(name), m_state("не обработан"), m_price(0), m_count(0)
+{
+	std::cout << "Создан объект класса Ingredient без указания цены.\n";
 	SetCount(count);
 }
 
@@ -18,18 +32,15 @@ Ingredient::~Ingredient()
 	std::cout << "Объект класса Ingredient удален.\n";
 }
 
-// getters:
-
-std::string Ingredient::GetName() const { return this->name; }
-std::string Ingredient::GetState() const { return this->state; }
-int Ingredient::GetPrice() const { return this->price; }
-int Ingredient::GetCount() const { return this->count; }
-
+std::string Ingredient::GetName() const { return m_name; }
+std::string Ingredient::GetState() const { return m_state; }
+int Ingredient::GetPrice() const { return m_price; }
+int Ingredient::GetCount() const { return m_count; }
 
 void Ingredient::SetCount(int count)
 {
 	if (count >= 0)
-		this->count = count;
+		m_count = count;
 	else
 		std::cout << "Error! Количество ингредиентов не может быть отрицательным.\n";
 }
@@ -37,37 +48,38 @@ void Ingredient::SetCount(int count)
 int Ingredient::RaiseCount(int delta)
 {
 	if (delta >= 0)
-		count += delta;
+		m_count += delta;
 	else
-		std::cout << "Error! Нельзя добавить отрицательное количество единиц ингредиента.\n";
-
-	return count;
+		std::cout << "Error! Нельзя добавить отрицательное количество.\n";
+	return m_count;
 }
 
 int Ingredient::ReduceCount(int delta)
 {
-	if (count - delta >= 0)
-		count -= delta;
+	if (m_count - delta >= 0)
+		m_count -= delta;
 	else
 		std::cout << "Error! Ингредиентов не хватает.\n";
-
-	return count;
+	return m_count;
 }
 
 void Ingredient::SetPrice(int price)
 {
 	if (price > 0)
-		this->price = price;
+		m_price = price;
 	else
 		std::cout << "Error! Цена должна быть больше 0.\n";
 }
 
 void Ingredient::ChangeState(std::string state)
 {
-	this->state = state;
+	m_state = state;
 }
 
 void Ingredient::PrintInfo() const
 {
-	std::cout << "\nИнгредиент " << name << "\nСостояние: " << state << "\nКоличество: " << count << "\nЦена за штуку: " << price << "\n\n";
+	std::cout << "Ингредиент: " << m_name << "\n"
+		<< "  Состояние: " << m_state << "\n"
+		<< "  Количество: " << m_count << "\n"
+		<< "  Цена: " << m_price << "\n";
 }
