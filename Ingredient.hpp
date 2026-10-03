@@ -1,7 +1,7 @@
+#pragma once
 
 // Объявление класса Ingredient
 
-#pragma once
 
 #include <string>
 
