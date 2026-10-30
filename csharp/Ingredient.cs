@@ -1,6 +1,6 @@
 using System;
 
-class Ingredient
+public class Ingredient
 {
     public string Name { get; }
 
