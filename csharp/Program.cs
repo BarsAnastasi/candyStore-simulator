@@ -1,6 +1,5 @@
 ﻿var eggs = new Ingredient("Яйцо", 100, 10);
 eggs.PrintInfo();
-var sugar = new Ingredient("Сахар", 50, 10);
-sugar.ReduceCount(15);
-sugar.Price = 0;
-sugar.PrintInfo();
+
+var step1 = new Step(eggs, ProcessType.Wash, 1, 15);
+step1.PrintInfo();
