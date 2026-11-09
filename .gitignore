@@ -29,6 +29,8 @@ obj/
 .vscode/
 .idea/
 *.user
+CppProperties.json
+*.vcxproj.filters
 # --- CMake ---
 CMakeFiles/
 CMakeCache.txt
