@@ -21,6 +21,8 @@ Debug/
 Release/
 x64/
 out/
+obj/
+bin/
 # --- Служебные файлы IDE ---
 .vs/
 .vscode/
