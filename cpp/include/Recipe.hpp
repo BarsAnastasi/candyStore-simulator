@@ -24,13 +24,17 @@ private:
 
 public:
 	Recipe(std::string name, int ingredientCapacity, int stepCapacity);
+	Recipe(const Recipe& other);
 
 	// геттеры
 	std::shared_ptr<Ingredient> GetIngredient(int index) const;
+	std::string GetName() const { return m_name; }
 	Step* GetStep(int index) const;
 	int GetAddedIngredientCount() const;
 	int GetAddedStepCount() const;
 	int GetCookingTime() const;
+
+	void SetName(const std::string& name) { m_name = name; }
 
 	// добавить объект в список: возвращает true, когда успешно добавлено
 	bool AddIngredient(std::string name, int count, std::string state);
