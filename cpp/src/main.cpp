@@ -3,60 +3,104 @@
 
 #include <iostream>
 #include <memory>
-
-// Подключение заголовочных файлов:
+#include <vector>
+#include <string>
 
 #include "Ingredient.hpp"
 #include "EnumProcessType.hpp"
 #include "Step.hpp"
 #include "Recipe.hpp"
+#include "BaseDish.hpp"
+#include "Dessert.hpp"
+#include "Drink.hpp"
+
+// Обработка строк: find и substr
+std::string ExtractDishTitle(std::string_view description)
+{
+	std::string text(description);
+	std::size_t firstQuote = text.find('\"');
+	if (firstQuote != std::string::npos)
+	{
+		std::size_t secondQuote = text.find('\"', firstQuote + 1);
+		if (secondQuote != std::string::npos)
+		{
+			return text.substr(firstQuote + 1, secondQuote - firstQuote - 1);
+		}
+	}
+	return "Не найдено";
+}
 
 int main()
 {
-    // Демонстрация 1: shared_ptr и use_count
-    std::cout << "\n--- Демонстрация shared_ptr ---\n";
-    auto eggs = std::make_shared<Ingredient>("Яйцо", 100, 10);
-    std::cout << "use_count после создания: " << eggs.use_count() << "\n"; // 1
+	std::cout << "=== 1. Конструкторы, деструкторы и передача *this ===\n";
+	{
+		auto cakeRecipe = std::make_shared<Recipe>("Медовик", 2, 1);
+		cakeRecipe->AddIngredient("Мёд", 2, "жидкий");
+		cakeRecipe->AddStep(cakeRecipe->GetIngredient(0), ProcessType::eBake, 600);
 
-    std::shared_ptr<Ingredient> eggsCopy = eggs; // копия
-    std::cout << "use_count после копирования: " << eggs.use_count() << "\n"; // 2
+		Dessert honeyCake("Торт Медовик", cakeRecipe, 160, true);
+		OrderBoard board;
+		honeyCake.SendToBoard(board);
+	}
 
-    eggsCopy.reset(); // отпускаем владение
-    std::cout << "use_count после reset: " << eggs.use_count() << "\n"; // 1
+	std::cout << "\n=== 2. Поверхностная и глубокая копия ===\n";
+	{
+		auto milkShakeRecipe = std::make_shared<Recipe>("Молочный коктейль базовый", 2, 1);
+		milkShakeRecipe->AddIngredient("Молоко", 1, "холодное");
+		milkShakeRecipe->AddStep(milkShakeRecipe->GetIngredient(0), ProcessType::eBeat, 30);
 
-    // Демонстрация 2: weak_ptr в действии
-    std::cout << "\n--- Демонстрация weak_ptr ---\n";
-    std::weak_ptr<Ingredient> watcher = eggs;
-    {
-        auto step1 = std::make_shared<Step>(eggs, ProcessType::eWash, 1, 15);
-        std::cout << "weak_ptr жив, пока eggs жив. lock() работает:\n";
-        step1->PrintInfo();
-    }
+		// Поверхностное разделение: оба напитка ссылаются на один std::shared_ptr<Recipe>
+		std::unique_ptr<BaseDish> shake1 = std::make_unique<Drink>("Клубничный коктейль", milkShakeRecipe, 350, false);
+		std::unique_ptr<BaseDish> shake2 = std::make_unique<Drink>("Ванильный коктейль", milkShakeRecipe, 350, false);
 
-    // Композиция и агрегация в Recipe
-    std::cout << "\n--- Композиция и агрегация ---\n";
-    {
-        Recipe recipe("Бисквит", 3, 5);
-        recipe.AddIngredient("Яйцо", 4, "сырое");
-        recipe.AddIngredient("Стакан сахара", 1, "не обработан");
-        recipe.AddIngredient("Стакан муки", 4, "не обработан");
-        recipe.AddIngredient("Ингредиент", 1, "-"); // Error!
+		// Глубокая копия через Clone()
+		std::unique_ptr<BaseDish> deepCopyShake = shake1->Clone();
 
-        recipe.AddStep(recipe.GetIngredient(0), ProcessType::eWash, 10);
-        recipe.AddStep(recipe.GetIngredient(0), ProcessType::eBeat, 60);
-        recipe.AddStep(recipe.GetIngredient(1), ProcessType::eAdd, 10);
-        recipe.AddStep(recipe.GetIngredient(2), ProcessType::eAdd, 10);
-        recipe.AddStep(recipe.GetIngredient(1), ProcessType::eBake, 900);
+		// Изменяем рецепт через shake1
+		shake1->ChangeRecipeName("Молочный коктейль (НОВЫЙ РЕЦЕПТ)");
 
-        recipe.Print();
-    } // здесь всё внутри recipe удалится
+		std::cout << "Оригинал:       ";
+		shake1->PrintInfo();
+		std::cout << "Общий рецепт:   ";
+		shake2->PrintInfo();
+		std::cout << "Глубокая копия: ";
+		deepCopyShake->PrintInfo();
+	}
 
-    // Демонстрация unique_ptr: передача владения
-    std::cout << "\n--- Демонстрация unique_ptr ---\n";
-    auto uniqueStep = std::make_unique<Step>(eggs, ProcessType::eCut, 2, 20);
-    std::cout << "unique_ptr жив, шаг создан.\n";
-    uniqueStep->PrintInfo();
-    // uniqueStep умрёт сам при выходе из main
+	std::cout << "\n=== 3. Работа со строками (конкатенация, find, substr, сравнение) ===\n";
+	{
+		auto teaRecipe = std::make_shared<Recipe>("Облепиховый чай", 1, 1);
+		Drink tea("Чай с облепихой", teaRecipe, 400, true);
 
-    return 0;
+		std::string desc = tea.Describe();
+		std::string title = ExtractDishTitle(desc);
+		std::string fullMessage = "Заказ: " + desc + " [ОПЛАЧЕНО]";
+
+		std::cout << fullMessage << "\n";
+		if (title == "Чай с облепихой")
+		{
+			std::cout << "Название извлечено верно: " << title << "\n";
+		}
+	}
+
+	std::cout << "\n=== 4. Массив std::unique_ptr<BaseDish> и статический счётчик ===\n";
+	{
+		std::vector<std::unique_ptr<BaseDish>> menu;
+
+		auto r1 = std::make_shared<Recipe>("Панна-котта", 1, 1);
+		auto r2 = std::make_shared<Recipe>("Капучино", 1, 1);
+
+		menu.push_back(std::make_unique<Dessert>("Панна-котта ягодная", r1, 150, false));
+		menu.push_back(std::make_unique<Drink>("Капучино", r2, 250, true));
+
+		std::cout << "Активных блюд в системе: " << BaseDish::GetDishCount() << "\n";
+
+		for (const auto& item : menu)
+		{
+			item->PrintInfo();
+		}
+	}
+
+	std::cout << "\nБлюд после очистки памяти: " << BaseDish::GetDishCount() << "\n";
+	return 0;
 }
