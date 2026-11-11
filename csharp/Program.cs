@@ -1,74 +1,54 @@
-﻿using System;
-using System.Runtime.CompilerServices;
-
+﻿using System.Collections.Generic;
+using static System.Console;
 
 class Program
 {
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    static WeakReference<Ingredient> CreateTemporaryIngredient()
-    {
-        var temp = new Ingredient("Списанный ингредиент", 1, 1);
-
-        return new WeakReference<Ingredient>(temp);
-    }
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    static void ForceGC()
-    {
-        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true);
-        GC.WaitForPendingFinalizers();
-        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true);
-    }
     public static void Main()
     {
-        Console.WriteLine("\n--- Композиция ---\n");
+        using var report = new ShiftReport();
+        var board = new OrderBoard();
 
-        var recipe = new Recipe("Бисквит", 3, 5);
-        recipe.AddIngredient("Яйцо", 4, "сырое");
-        recipe.AddIngredient("Стакан сахара", 1, "не обработан");
-        recipe.AddIngredient("Стакан муки", 4, "не обработан");
-        recipe.AddIngredient("ингредиент", 1, "-"); // Error!
+        WriteLine("=== 1. Полиморфная коллекция и передача this ===");
+        var rCake = new Recipe("Медовик", 2, 1);
+        rCake.AddIngredient("Мёд", 2, "жидкий");
+        rCake.AddStep(rCake.GetIngredient(0), ProcessType.Bake, 600);
 
-        recipe.AddStep(recipe.GetIngredient(0), ProcessType.Wash, 10);
-        recipe.AddStep(recipe.GetIngredient(0), ProcessType.Beat, 60);
-        recipe.AddStep(recipe.GetIngredient(1), ProcessType.Add, 10);
-        recipe.AddStep(recipe.GetIngredient(2), ProcessType.Add, 10);
-        recipe.AddStep(recipe.GetIngredient(1), ProcessType.Bake, 15 * 60);
+        var rCoffee = new Recipe("Латте", 1, 1);
+        rCoffee.AddIngredient("Кофе", 1, "молотый");
+        rCoffee.AddStep(rCoffee.GetIngredient(0), ProcessType.Cook, 30);
 
-        recipe.Print();
-
-        Console.WriteLine("\n--- Агрегация ---");
-
-        var eggs = new Ingredient("Яйцо", 100, 10);
-        eggs.PrintInfo();
-
-        var step1 = new Step(eggs, ProcessType.Wash, 1, 15);
-        step1.PrintInfo();
-
-        // Демонстрация работы с ссылкой на объект
-        step1.Ingredient.ChangeState("чистый");
-        eggs.PrintInfo();
-
-        // Демонстрация работы со структурами
-        var p1 = new Portion(150);
-        var p2 = p1;
-        p2.Grams = 300;
-        Console.WriteLine($"Порция 1: {p1}, порция 2: {p2}");
-
-        // Демонстрация работы IDisposable
-
-        using (var log = new RecipeLog("Бисквит"))
+        var dishes = new List<BaseDish>
         {
-            log.Write("добавлен ингредиент «Яйцо»");
-            log.Write("выполнен шаг «взбить»");
+            new Dessert("Торт Медовик", rCake, 160, true),
+            new Drink("Латте", rCoffee, 300, true)
+        };
+
+        foreach (var dish in dishes)
+        {
+            dish.SendToBoard(board);
+            report.WriteLine(dish.Describe());
         }
-        Console.WriteLine("После блока using");
+        WriteLine($"Всего создано блюд: {BaseDish.GetDishCount()}\n");
 
-        // Демонстрация работы сборщика мусора (WeakReference)
-        var watcher = CreateTemporaryIngredient();
-        Console.WriteLine($"До GC: объект жив? {watcher.TryGetTarget(out _)}");
-        ForceGC();
-        Console.WriteLine($"После GC: объект жив? {watcher.TryGetTarget(out _)}");
+        WriteLine("=== 2. Поверхностная (MemberwiseClone) и глубокая копия ===");
+        var rCheesecake = new Recipe("Чизкейк классический", 2, 1);
+        rCheesecake.AddIngredient("Творожный сыр", 1, "не обработан");
+        rCheesecake.AddStep(rCheesecake.GetIngredient(0), ProcessType.Bake, 900);
 
+        var original = new Dessert("Чизкейк", rCheesecake, 180, true);
+        var shallow = original.ShallowCopy();
+        var deep = original.DeepCopy();
+
+        original.ChangeRecipeName("Чизкейк (ОБНОВЛЁННЫЙ)");
+
+        WriteLine("Оригинал:       " + original.Describe());
+        WriteLine("Поверхностная:  " + shallow.Describe());
+        WriteLine("Глубокая копия: " + deep.Describe());
+
+        WriteLine("\n=== 3. Сравнение по содержимому (Equals) ===");
+        var drinkA = new Drink("Какао", new Recipe("Какао", 1, 1), 250, true);
+        var drinkB = new Drink("Какао", new Recipe("Какао с маршмеллоу", 2, 1), 300, true);
+        WriteLine($"drinkA == drinkB (по ссылке): {drinkA == drinkB}");
+        WriteLine($"drinkA.Equals(drinkB) (по названию): {drinkA.Equals(drinkB)}");
     }
 }
