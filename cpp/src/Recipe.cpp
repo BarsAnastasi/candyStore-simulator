@@ -14,6 +14,41 @@ Recipe::Recipe(std::string name, int ingredientCapacity, int stepCapacity)
 	std::cout << "Создан объект класса Recipe.\n";
 }
 
+Recipe::Recipe(const Recipe& other)
+	: m_name(other.m_name),
+	m_ingredientCapacity(other.m_ingredientCapacity),
+	m_stepCapacity(other.m_stepCapacity),
+	m_cookingTime(other.m_cookingTime)
+{
+	std::cout << "Создана копия объекта класса Recipe.\n";
+
+	for (const auto& ing : other.m_ingredientList)
+	{
+		std::shared_ptr<Ingredient> newIng;
+		if (ing->GetPrice() > 0)
+			newIng = std::make_shared<Ingredient>(ing->GetName(), ing->GetPrice(), ing->GetCount());
+		else
+			newIng = std::make_shared<Ingredient>(ing->GetName(), ing->GetCount());
+
+		newIng->ChangeState(ing->GetState());
+		m_ingredientList.push_back(newIng);
+	}
+
+	for (size_t i = 0; i < other.m_stepList.size(); ++i)
+	{
+		if (!m_ingredientList.empty())
+		{
+			size_t ingIndex = i < m_ingredientList.size() ? i : 0;
+			m_stepList.push_back(std::make_unique<Step>(
+				m_ingredientList[ingIndex],
+				other.m_stepList[i]->GetProcessType(),
+				static_cast<int>(m_stepList.size()) + 1,
+				other.m_stepList[i]->GetTime()));
+		}
+	}
+}
+
+
 Recipe::~Recipe()
 {
 	std::cout << "Удален объект класса Recipe.\n";
