@@ -13,7 +13,7 @@ public class Recipe
     public string Name
     {
         get => _name;
-        private set => _name = value;
+        set => _name = value;
     }
 
     public int IngredientCapacity
@@ -44,6 +44,38 @@ public class Recipe
         _stepList = new List<Step>();
         Console.WriteLine("Создан объект класса Recipe.");
     }
+
+    public Recipe(Recipe other)
+    {
+        _name = other._name;
+        _ingredientCapacity = other._ingredientCapacity;
+        _stepCapacity = other._stepCapacity;
+        _cookingTime = other._cookingTime;
+        _ingredientList = new List<Ingredient>();
+        _stepList = new List<Step>();
+
+        foreach (var ing in other._ingredientList)
+        {
+            var copyIng = ing.Price > 0
+                ? new Ingredient(ing.Name, ing.Price, ing.Count)
+                : new Ingredient(ing.Name, ing.Count);
+            copyIng.ChangeState(ing.State);
+            _ingredientList.Add(copyIng);
+        }
+
+        for (int i = 0; i < other._stepList.Count; i++)
+        {
+            var oldStep = other._stepList[i];
+            if (_ingredientList.Count > 0)
+            {
+                var targetIng = i < _ingredientList.Count ? _ingredientList[i] : _ingredientList[0];
+                _stepList.Add(new Step(targetIng, oldStep.Process, i + 1, oldStep.Time));
+            }
+        }
+
+        Console.WriteLine("Создана копия объекта класса Recipe.");
+    }
+
 
     private int CalcCookingTime() => _stepList.Sum(s => s.Time);
 
