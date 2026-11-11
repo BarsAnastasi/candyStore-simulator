@@ -21,13 +21,15 @@ Debug/
 Release/
 x64/
 out/
-obj/
+# --- C# ---
 bin/
+obj/
 # --- Служебные файлы IDE ---
 .vs/
 .vscode/
 .idea/
 *.user
+CppProperties.json
 *.vcxproj.filters
 # --- CMake ---
 CMakeFiles/
