@@ -3,7 +3,7 @@ using System.Linq;
 
 public class Recipe
 {
-    private string _name;
+    private string _name = string.Empty;
     private List<Ingredient> _ingredientList;
     private List<Step> _stepList;
     private int _ingredientCapacity;
@@ -112,7 +112,7 @@ public class Recipe
     public bool AddStep(Ingredient? ingredient, ProcessType process, int time)
     {
 
-        if (_stepList.Count >= _stepCapacity)
+        if (ingredient == null || _stepList.Count >= _stepCapacity)
         {
             Console.WriteLine("Error! В рецепт больше нельзя добавить шаги!");
             return false;
