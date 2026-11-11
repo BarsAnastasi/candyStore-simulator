@@ -3,18 +3,18 @@
 //
 
 #include "Step.hpp"
-#include "Ingredient.hpp"
+//#include "Ingredient.hpp"
 #include "EnumProcessType.hpp"
 
 #include <iostream>
 
 Step::Step()
-	: m_ingredient(nullptr), m_process(ProcessType::eCook), m_stepNum(1), m_time(1)
+	: m_ingredient(), m_process(ProcessType::eCook), m_stepNum(1), m_time(1)
 {
 	std::cout << "Создан объект класса Step c конструктором без параметров.\n";
 }
 
-Step::Step(Ingredient* ingredient, ProcessType process, int stepNum, int time)
+Step::Step(std::shared_ptr<Ingredient> ingredient, ProcessType process, int stepNum, int time)
 	: m_ingredient(ingredient), m_process(process)
 {
 	std::cout << "Создан объект класса Step.\n";
@@ -56,9 +56,13 @@ std::string Step::GetProcessString() const
 
 void Step::PrintInfo() const
 {
+	if (auto ingredient = m_ingredient.lock()) {
 	std::cout << m_stepNum << ". " 
-			  << m_ingredient->GetName() << ' ' 
-		<< m_ingredient->GetCount() << " шт. в состоянии " << m_ingredient->GetState() 
+			  << ingredient->GetName() << ' '
+		<< ingredient->GetCount() << " шт. в состоянии " << ingredient->GetState()
 		<< ", " << GetProcessString() << ' ' 
 		<< m_time << " сек.\n";
+	}
+	else
+		std::cout << "Error! Ингредиент был удален.\n";
 }
